@@ -37,7 +37,8 @@ if [[ -f ~/.bashrc ]]; then
     print_war_q "Automatically add the sourcing of setup.bash to your .bashrc? (y/n) "
     read RES
     if [[ "$RES" == "y" ]]; then
-        echo "source ${ROOT_DIR}/setup.bash" >> ~/.bashrc
+        REPO_DIR="$(cd ${ROOT_DIR}/.. && pwd)"
+        echo "source ${REPO_DIR}/setup.bash" >> ~/.bashrc
         print_ok "Done"
     fi
 fi
