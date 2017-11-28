@@ -1,0 +1,3 @@
+SR_IMAGE_NAME=
+
+export SR_IMAGE_NAME

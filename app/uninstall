@@ -41,15 +41,14 @@ rm "$FOLDER/$NAME"
 rm /etc/bash_completion.d/$NAME
 
 # Automatically removes the setup.bash sourcing from .bashrc
-#if [[ -f ~/.bashrc ]]; then
-#    SR_ROOT_DIR="$(cd ${ROOT_DIR}/../../../ && pwd)"
-#    BASH_LINE="source ${SR_ROOT_DIR}/setup.bash"
-#    BASH_LINE_ESCAPED="$(echo $BASH_LINE | sed 's,/,\\/,g')"
-#    sed -i "/${BASH_LINE_ESCAPED}/d" ~/.bashrc
-#
-#    if [[ "$?" != "0" ]]; then
-#        exit "$?"
-#    fi
-#fi
+if [[ -f ~/.bashrc ]]; then
+    BASH_LINE="source ${ROOT_DIR}/setup.bash"
+    BASH_LINE_ESCAPED="$(echo $BASH_LINE | sed 's,/,\\/,g')"
+    sed -i "/${BASH_LINE_ESCAPED}/d" ~/.bashrc
+
+    if [[ "$?" != "0" ]]; then
+        exit "$?"
+    fi
+fi
 
 print_ok "Successfully uninstalled ${NAME}"
