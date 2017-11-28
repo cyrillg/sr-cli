@@ -1,0 +1,9 @@
+path  - (Optional) Path to the ROS workspace to mount. Must be absolute.
+        Default: . (current folder)
+        Example: /home/username/my_ws
+
+Reset the sr-dev docker container. It will base the container on the image whose
+name is:
+  - given by the SR_IMAGE_NAME environment variable if it is set
+  - cyrillg/sr-dev if it is not
+The <path> will be mounted as a shared volume in the container as /home/serial/ros-ws.

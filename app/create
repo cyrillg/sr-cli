@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+#-----------------------------------------------------------------------------
+ROOT_DIR="$(dirname "$(perl -e 'use Cwd "abs_path"; \
+                                print abs_path(shift)' $0)")"
+. "${ROOT_DIR}/../utils"
+
+if [[ "$#" -gt "1" ]]; then
+    print_err "Too many arguments"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Check for a valid ROS workspace to mount
+ROS_WS=/home/serial/ros_ws
+IMAGE_NAME=${SR_IMAGE_NAME:-cyrillg/sr-dev}
+HOST_WS="${1-$(pwd)}"
+if [[ ! -f "$HOST_WS/.catkin_workspace" ]]; then
+    if [[ "$#" -eq "0" ]]; then
+        print_err "The current directory is not a catkin workspace."
+    else
+        print_err "The specified directory is not a catkin workspace."
+    fi
+    print_err "Please move to the ros-playground and re-run the command or specify its absolute path"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Check for the existence of the image
+RES_IMG="$(docker images --filter=reference=${IMAGE_NAME} \
+                         --format "{{.Repository}}" 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Issue running following command: "
+    print_err "    docker images --filter=reference=${IMAGE_NAME}"
+    print_err "                  --format "{{.Repository}}""
+    print_stdout "$RES_IMG"
+    exit 1
+fi
+
+if [[ -z "$RES_IMG" ]]; then
+    print_err "Cannot find the ${IMAGE_NAME} image locally. Please:"
+    print_err "  - go to the root of the image definition"
+    print_err "  - run: sr-cli build ${IMAGE_NAME}"
+    print_err "or specify an existing image in ${ROOT_DIR}/utils/setup.bash"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Check for the existence of a container
+RES_PS="$(docker ps -a --filter=name=sr-docker --format \"{{.ID}}\" 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Issue running following command:"
+    print_err "    docker ps -a --filter=name=sr-docker"
+    print_err "                 --format \"{{.ID}}\""
+    print_stdout "$RES_PS"
+    exit 1
+fi
+
+if [[ ! -z "$RES_PS" ]]; then
+    print_err "A sr-docker container already exists. Are you looking for:"
+    print_err ""
+    print_err "    sr-cli reset"
+    print_err ""
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Create a new container
+print_info "Creating sr-docker container from $IMAGE_NAME..."
+RES_CREATE="$(docker create \
+                    -p 5900:5900 \
+                    -p 12321:22 \
+                    --volume=${HOST_WS}:${ROS_WS}:rw \
+                    --name sr-docker \
+                    ${IMAGE_NAME} 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Could not create the sr-docker container, please ensure no previous sr-docker is running:"
+    print_err ""
+    print_err "    sr-cli status"
+    print_err ""
+    print_stdout "$RES_CREATE"
+    exit 1
+fi
+print_ok "Successfully created new sr-docker"
+print_info "You can start this new container with:"
+print_info ""
+print_info "    sr-cli start"
+print_info ""
+

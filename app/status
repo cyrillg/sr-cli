@@ -1,0 +1,57 @@
+#! /usr/bin/env bash
+
+#-----------------------------------------------------------------------------
+#ROOT_DIR=`dirname "$(perl -e 'use Cwd "abs_path"; print abs_path(shift)' $0)"`
+ROOT_DIR="$(dirname "$(perl -e 'use Cwd "abs_path"; \
+                                print abs_path(shift)' $0)")"
+. "${ROOT_DIR}/../utils"
+
+if [[ "$#" -gt "0" ]]; then
+    print_err "Too many arguments"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Get current image name
+IMAGE_NAME=${SR_IMAGE_NAME:-cyrillg/sr-dev}
+print_info "Current image name:   ${COLOR_BOLD}${IMAGE_NAME}${COLOR_RESET_BOLD}."
+
+#-----------------------------------------------------------------------------
+# Check image state
+RES_IMG="$(docker images --filter=reference=${IMAGE_NAME} --format \"{{.Repository}}\")"
+if [[ "$?" != "0" ]]; then
+    print_err "Issue running following command:"
+    print_err "    docker images --filter=reference=${IMAGE_NAME}"
+    print_err "                  --format \"{{.Repository}}\""
+    print_stdout "${RES_IMG}"
+    exit 1
+fi
+
+if [[ -z "$RES_IMG" ]]; then
+    #print_info "Image ${COLOR_BOLD}$IMAGE_NAME${COLOR_RESET_BOLD} is ${COLOR_BOLD}${COLOR_RED}not built${COLOR_NORMAL}${COLOR_RESET_BOLD}."
+    print_info "Image:                ${COLOR_BOLD}${COLOR_RED}not built${COLOR_NORMAL}${COLOR_RESET_BOLD}"
+else
+    #print_info "Image ${COLOR_BOLD}$IMAGE_NAME${COLOR_RESET_BOLD} is ${COLOR_BOLD}${COLOR_GREEN}built${COLOR_NORMAL}${COLOR_RESET_BOLD}."
+    print_info "Image:                ${COLOR_BOLD}${COLOR_GREEN}built${COLOR_NORMAL}${COLOR_RESET_BOLD}"
+fi
+
+#-----------------------------------------------------------------------------
+# Check container state
+RES_PS="$(docker ps -a --filter=name=sr-docker --format \"{{.Status}}\")"
+if [[ "$?" != "0" ]]; then
+    print_err "Issue running following command:"
+    print_err "    docker ps -a --filter=name=sr-docker"
+    print_err "                 --format \"{{.Status}}\""
+    print_stdout "${RES_PS}"
+    exit 1
+fi
+
+if [[ -z "$RES_PS" ]]; then
+    #print_info "Container ${COLOR_BOLD}sr-dev${COLOR_RESET_BOLD} is ${COLOR_BOLD}${COLOR_RED}not created${COLOR_NORMAL}${COLOR_RESET_BOLD}."
+    print_info "Container:            ${COLOR_BOLD}${COLOR_RED}not created${COLOR_NORMAL}${COLOR_RESET_BOLD}"
+else
+    #print_info "Container ${COLOR_BOLD}sr-dev${COLOR_RESET_BOLD} is ${COLOR_BOLD}${COLOR_GREEN}created${COLOR_NORMAL}${COLOR_RESET_BOLD}:"
+    print_info "Container:            ${COLOR_BOLD}${COLOR_GREEN}created${COLOR_NORMAL}${COLOR_RESET_BOLD}"
+    print_info "                      -> ${RES_PS}"
+fi
+

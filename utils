@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+COLOR_BLACK="\033[30m"
+COLOR_RED="\033[31m"
+COLOR_GREEN="\033[32m"
+COLOR_YELLOW="\033[33m"
+COLOR_BLUE="\033[34m"
+COLOR_MAGENTA="\033[35m"
+COLOR_CYAN="\033[36m"
+COLOR_LIGHT_GRAY="\033[37m"
+COLOR_DARK_GRAY="\033[38m"
+COLOR_NORMAL="\033[39m"
+COLOR_BOLD="\033[1m"
+COLOR_RESET_BOLD="\033[0m"
+
+ERROR="[${COLOR_RED}ERROR${COLOR_NORMAL}]   "
+WARNING="[${COLOR_YELLOW}WARNING${COLOR_NORMAL}] "
+OK="[${COLOR_GREEN}SUCCESS${COLOR_NORMAL}] "
+INFO="[${COLOR_BLUE}INFO${COLOR_NORMAL}]    "
+
+function print_err() {
+    #echo -e "${ERROR}$1" >&2
+    echo -e "${COLOR_RED}$1${COLOR_NORMAL}" >&2
+}
+
+function print_info() {
+    #echo -e "${INFO}$1"
+    echo -e "${COLOR_NORMAL}$1${COLOR_NORMAL}" >&2
+}
+
+function print_war() {
+    #echo -e "${WARNING}$1"
+    echo -e "${COLOR_YELLOW}$1${COLOR_NORMAL}" >&2
+}
+
+function print_war_q() {
+    #echo -en "${WARNING}$1"
+    echo -en "${COLOR_YELLOW}$1${COLOR_NORMAL}" >&2
+}
+
+function print_ok() {
+    #echo -e "${OK}$1"
+    echo -e "${COLOR_GREEN}$1${COLOR_NORMAL}" >&2
+}
+
+function print_stdout() {
+    echo "====== STDOUT CAPTURE ======"
+    while read line; do echo "$line"; done <<< "$1" | sed -n ${N}p
+    echo "============================"
+}
+
+function bcli_trim_whitespace() {
+    # Function courtesy of http://stackoverflow.com/a/3352015
+    local var="$*"
+    var="${var#"${var%%[![:space:]]*}"}"   # remove leading whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"   # remove trailing whitespace characters
+    echo -n "$var"
+}
+
+function bcli_show_header() {
+    echo -e "$(bcli_trim_whitespace "$(cat "$1/.name")")"
+    echo -e "${COLOR_CYAN}Version  ${COLOR_NORMAL}$(bcli_trim_whitespace "$(cat "$1/.version")")"
+    echo -e "${COLOR_CYAN}Author   ${COLOR_NORMAL}$(bcli_trim_whitespace "$(cat "$1/.author")")"
+}
+

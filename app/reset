@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+#-----------------------------------------------------------------------------
+ROOT_DIR="$(dirname "$(perl -e 'use Cwd "abs_path"; \
+                                print abs_path(shift)' $0)")"
+. "${ROOT_DIR}/../utils"
+
+if [[ "$#" -gt "1" ]]; then
+    print_err "Too many arguments"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Safety confirmation
+print_war "This operation will delete the current container and with it all changes done after its creation."
+print_war_q "Are you sure you want to reset the sr-docker container? (y/n) "
+read RESP
+if [[ "$RESP" != "y" ]]; then
+    print_info "Cancelled"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Check for a valid ROS workspace to mount
+HOST_WS="${1-$(pwd)}"
+if [[ ! -f "$HOST_WS/.catkin_workspace" ]]; then
+    if [[ "$#" -eq "0" ]]; then
+        print_err "The current directory is not a catkin workspace."
+    else
+        print_err "The specified directory is not a catkin workspace."
+    fi
+    print_err "Please move to the ros-playground or specify its path"
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Check for the existence of a container
+RES_PS="$(docker ps -a --filter=name=sr-docker --format \"{{.ID}}\" 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Issue running following command:"
+    print_err "    docker ps -a --filter=name=sr-docker"
+    print_err "                 --format \"{{.ID}}\""
+    print_stdout "$RES_PS"
+    exit 1
+fi
+
+if [[ -z "$RES_PS" ]]; then
+    print_err "No container to reset. Are you looking for:"
+    print_err ""
+    print_err "    sr-cli create"
+    print_err ""
+    exit 1
+fi
+
+#-----------------------------------------------------------------------------
+# Delete the current container
+print_info "Deleting sr-docker container..."
+RES_RM="$(docker rm sr-docker 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Could not delete the sr-docker container, please ensure it is not running:"
+    print_err ""
+    print_err "    sr-cli status / sr-cli stop"
+    print_err ""
+    print_stdout "$RES_RM"
+    exit 1
+fi
+print_ok "Successfully deleted: sr-docker"
+
+#-----------------------------------------------------------------------------
+# Create a new container
+IMAGE_NAME=${SR_IMAGE_NAME:-cyrillg/sr-dev}
+print_info "Creating new sr-docker container:"
+print_info "  - image: ${IMAGE_NAME}"
+print_info "  - ROS workspace: ${HOST_WS}"
+RES_CREATE="$(sr-cli create ${1-} 2>&1)"
+if [[ "$?" != "0" ]]; then
+    print_err "Could not create the new sr-docker container, please ensure the image ${IMAGE_NAME} is built:"
+    print_err ""
+    print_err "    sr-cli status"
+    print_err ""
+    print_stdout "$RES_CREATE"
+    exit 1
+fi
+print_ok "Successfully created new sr-docker"
+print_info "You can start this new container with:"
+print_info ""
+print_info "    sr-cli start"
+print_info ""
+

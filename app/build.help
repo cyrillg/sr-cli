@@ -1,0 +1,9 @@
+image_name   - (Optional) The name you would like to use for your commands
+               Example: my-image
+               Default: sr-dev
+
+Build a docker image from a custom dockerfile.
+You are required to run this command from the folder containing the Dockerfile
+If <image_name> is specified, you will be required to change the SR_IMAGE_NAME
+variable in the setup.bash to <image_name> to be able to continue using sr-cli
+with the new image.
