@@ -42,12 +42,17 @@ rm /etc/bash_completion.d/$NAME
 
 # Automatically removes the setup.bash sourcing from .bashrc
 if [[ -f ~/.bashrc ]]; then
-    BASH_LINE="source ${ROOT_DIR}/setup.bash"
-    BASH_LINE_ESCAPED="$(echo $BASH_LINE | sed 's,/,\\/,g')"
-    sed -i "/${BASH_LINE_ESCAPED}/d" ~/.bashrc
+    print_war_q "Automatically remove the sourcing of setup.bash from your .bashrc? (y/n) "
+    read RES
+    if [[ "$RES" == "y" ]]; then
+        BASH_LINE="source ${ROOT_DIR}/setup.bash"
+        BASH_LINE_ESCAPED="$(echo $BASH_LINE | sed 's,/,\\/,g')"
+        sed -i "/${BASH_LINE_ESCAPED}/d" ~/.bashrc
 
-    if [[ "$?" != "0" ]]; then
-        exit "$?"
+        if [[ "$?" != "0" ]]; then
+            exit "$?"
+        fi
+        print_ok "Done"
     fi
 fi
 
