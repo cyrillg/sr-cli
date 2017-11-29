@@ -2,15 +2,14 @@
 
 ## Installation
 
-From the `cli/` folder run: `sudo ./cli install sr-cli`
+1. From the `cli/` folder run: `sudo ./cli install sr-cli`  
 This will:
-* allow you to call the CLI from any location in your filesystem (adds a symlink
-* to the `cli` script in `/usr/bin`)
-* setup the auto-completion (copies the `complete` script in
-* `/etc/bash_completion.d/`).
 
-_**Note**: If you wish to give another name to your CLI, you simply need to run
-`sudo ./cli install YOUR_NAME_HERE` instead._
+    * allow you to call the CLI from any location in your filesystem (adds a
+    * symlink to the `cli` script in `/usr/bin`).
+    * setup the auto-completion (adds a script in `/etc/bash_completion.d/`).
+
+1. Source your `.bashrc` or restart your terminal.
 
 ## Use
 
@@ -21,6 +20,14 @@ description.
 
 From the `cli/` folder run: `sudo ./cli uninstall sr-cli`
 This will remove the two files created during the installation step.
+
+## Screencasts
+
+* Install and first run
+
+[![asciicast](https://asciinema.org/a/uziQIiamjbRZQwK9msiP5JUKo.png)](https://asciinema.org/a/uziQIiamjbRZQwK9msiP5JUKo)
+
+* Use a custom image instead of the default `cyrillg/sr-dev`
 
 ## Credits
 
